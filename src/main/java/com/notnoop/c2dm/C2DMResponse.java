@@ -95,4 +95,8 @@ public enum C2DMResponse {
     public String getKey() {
         return key;
     }
+
+    public boolean isSuccessful() {
+        return this == SUCCESSFUL;
+    }
 }
