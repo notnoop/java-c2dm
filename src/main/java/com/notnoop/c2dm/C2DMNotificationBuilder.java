@@ -92,7 +92,7 @@ public class C2DMNotificationBuilder {
     }
 
     private void checkInitialization() {
-        if (collapseKey != null) {
+        if (collapseKey == null) {
             throw new IllegalStateException("Collapse Key is required and missing");
         }
     }
