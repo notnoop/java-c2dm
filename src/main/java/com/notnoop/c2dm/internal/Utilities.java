@@ -42,10 +42,6 @@ import com.notnoop.c2dm.C2DMNotification;
 import com.notnoop.c2dm.C2DMResponse;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,26 +54,6 @@ public final class Utilities {
      */
     public static String DEFAULT_C2DM_SERVICE_URI = "https://android.apis.google.com/c2dm/send";
 
-    public static String readFully(InputStream is) {
-        final char[] buffer = new char[0x10000];
-        StringBuilder out = new StringBuilder();
-        try {
-            Reader in = new InputStreamReader(is, "UTF-8");
-            int read;
-            do {
-                read = in.read(buffer, 0, buffer.length);
-                if (read>0) {
-                    out.append(buffer, 0, read);
-                }
-            } while (read>=0);
-            return out.toString();
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static ThreadSafeClientConnManager poolManager(int maxConnections) {
         ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
         cm.setMaxTotal(maxConnections);
@@ -85,15 +61,6 @@ public final class Utilities {
 
         return cm;
     }
-
-    public static byte[] toUTF8(String content) {
-        try {
-            return content.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new AssertionError("The world is coming to an end!  No UTF-8 support");
-        }
-    }
-
 
     public static List<NameValuePair> requestBodyOf(String registrationId, C2DMNotification notify) {
         List<NameValuePair> pairs = new ArrayList<NameValuePair>();
