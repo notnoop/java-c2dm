@@ -129,10 +129,9 @@ public final class Utilities {
         }
 
         if (response.containsHeader(UPDATE_CLIENT_AUTH)) {
-            Header[] header = response.getHeaders(UPDATE_CLIENT_AUTH);
-            assert header.length > 0;
+            Header header = response.getFirstHeader(UPDATE_CLIENT_AUTH);
 
-            String newAuthToken = header[0].getValue();
+            String newAuthToken = header.getValue();
             delegate.authTokenUpdated(newAuthToken);
         }
     }
