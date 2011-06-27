@@ -33,4 +33,6 @@ package com.notnoop.c2dm;
 public interface C2DMDelegate {
     public void messageSent(C2DMNotification message, C2DMResponse response);
     public void messageFailed(C2DMNotification message, C2DMResponse response);
+
+    public void authTokenUpdated(String newAuthToken);
 }

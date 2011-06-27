@@ -30,6 +30,7 @@
 */
 package com.notnoop.c2dm.internal;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -111,14 +112,28 @@ public final class Utilities {
         return pairs;
     }
 
+    private static final String UPDATE_CLIENT_AUTH = "Update-Client-Auth";
+
     public static void fireDelegate(C2DMNotification message,
             HttpResponse response, C2DMDelegate delegate) {
+        if (delegate == null) {
+            return;
+        }
+
         C2DMResponse r = logicalResponseFor(response);
 
         if (r == C2DMResponse.SUCCESSFUL) {
             delegate.messageSent(message, r);
         } else {
             delegate.messageFailed(message, r);
+        }
+
+        if (response.containsHeader(UPDATE_CLIENT_AUTH)) {
+            Header[] header = response.getHeaders(UPDATE_CLIENT_AUTH);
+            assert header.length > 0;
+
+            String newAuthToken = header[0].getValue();
+            delegate.authTokenUpdated(newAuthToken);
         }
     }
 
