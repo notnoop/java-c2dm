@@ -35,37 +35,64 @@ package com.notnoop.c2dm;
  */
 public enum C2DMResponse {
     /**
+     * Message was sent successfully
+     */
+    SUCCESSFUL(null, false),
+
+    /**
      * Too many messages sent by the sender. Retry after a while.
      */
-    QuotaExceeded,
+    QUOTA_EXCEEDED("QuotaExceeded", true),
 
     /**
      * Too many messages sent by the sender to a specific device. Retry after
      * a while.
      */
-    DeviceQuotaExceeded,
+    DEVICE_QUOTA_EXCEEDED("DeviceQuotaExceeded", true),
 
     /**
      * Missing or bad registration_id. Sender should stop sending messages to
      * this device.
      */
-    InvalidRegistration,
+    INVALID_REGISTRATION("InvalidRegistration", false),
 
     /**
      * The registration_id is no longer valid, for example user has
      * uninstalled the application or turned off notifications. Sender should
      * stop sending messages to this device.
      */
-    NotRegistered,
+    NOT_REGISTERED("NotRegistered", false),
 
     /**
      * The payload of the message is too big, see the limitations. Reduce the
      * size of the message.
      */
-    MessageTooBig,
+    MESSAGE_TO_BIG("MessageTooBig", false),
 
     /**
      * Collapse key is required. Include collapse key in the request.
      */
-    MissingCollapseKey;
+    MISSING_COLLAPSE_KEY("MissingCollapseKey", false),
+
+    SERVER_UNAVAILABLE(null, true),
+
+    INVALID_AUTHENTICATION(null, false),
+    
+    UNKNOWN_ERROR(null, false);
+
+    private final String key;
+    private final boolean shouldRetry;
+
+    C2DMResponse(String key, boolean shouldRetry) {
+        this.key = key;
+        this.shouldRetry = shouldRetry;
+    }
+
+    public boolean shouldRetry() {
+        return shouldRetry;
+    }
+    
+    public String getKey() {
+        return key;
+    }
 }

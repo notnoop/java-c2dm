@@ -32,12 +32,15 @@ package com.notnoop.c2dm.internal;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.notnoop.c2dm.C2DMDelegate;
 import com.notnoop.c2dm.C2DMNotification;
+import com.notnoop.c2dm.C2DMResponse;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -110,7 +113,46 @@ public final class Utilities {
 
     public static void fireDelegate(C2DMNotification message,
             HttpResponse response, C2DMDelegate delegate) {
-        // FIXME: Implement this method
-        delegate.messageSent(message, null);
+        C2DMResponse r = logicalResponseFor(response);
+
+        if (r == C2DMResponse.SUCCESSFUL) {
+            delegate.messageSent(message, r);
+        } else {
+            delegate.messageFailed(message, r);
+        }
+    }
+
+    private static final C2DMResponse[] logicalResponses = C2DMResponse.values();
+    public static C2DMResponse logicalResponseFor(HttpResponse response) {
+        int statusCode = response.getStatusLine().getStatusCode();
+        switch (statusCode) {
+        case 503: return C2DMResponse.SERVER_UNAVAILABLE;
+        case 401: return C2DMResponse.INVALID_AUTHENTICATION;
+        case 200: {
+            try {
+                List<NameValuePair> pairs = URLEncodedUtils.parse(response.getEntity());
+                assert pairs.size() == 1;
+
+                NameValuePair entry = pairs.get(0);
+                if ("id".equals(entry.getName())) {
+                    return C2DMResponse.SUCCESSFUL;
+                }
+
+                assert "Error".equals(entry.getName());
+                String value = entry.getValue();
+
+                for (C2DMResponse r: logicalResponses) {
+                    if (value.equals(r.getKey())) {
+                        return r;
+                    }
+                }
+
+                return C2DMResponse.UNKNOWN_ERROR;
+            } catch (IOException e) {
+                return C2DMResponse.UNKNOWN_ERROR;
+            }
+        }
+        default: return C2DMResponse.UNKNOWN_ERROR;
+        }
     }
 }
