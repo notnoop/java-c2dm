@@ -1,0 +1,14 @@
+.DS_Store
+.#*
+*.sw?
+bin
+
+target
+release.properties
+
+*~
+
+.project
+.classpath
+.settings
+tags
