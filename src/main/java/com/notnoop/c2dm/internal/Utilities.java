@@ -44,6 +44,7 @@ import org.apache.http.util.EntityUtils;
 import com.notnoop.c2dm.C2DMDelegate;
 import com.notnoop.c2dm.C2DMNotification;
 import com.notnoop.c2dm.C2DMResponse;
+import com.notnoop.c2dm.exceptions.RuntimeIOException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -92,10 +93,20 @@ public final class Utilities {
             return;
         }
 
-        C2DMResponse r = logicalResponseFor(response);
+        List<NameValuePair> pairs;
+        try {
+            pairs = parseResponse(response.getEntity());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeIOException(e);
+        }
+        C2DMResponse r = logicalResponseFor(response, pairs);
 
         if (r == C2DMResponse.SUCCESSFUL) {
-            delegate.messageSent(message, r);
+            assert pairs.size() == 1 && "id".equalsIgnoreCase(pairs.get(0).getName());
+            String id = pairs.get(0).getValue();
+            delegate.messageSent(message, r, id);
         } else {
             delegate.messageFailed(message, r);
         }
@@ -109,34 +120,29 @@ public final class Utilities {
     }
 
     private static final C2DMResponse[] logicalResponses = C2DMResponse.values();
-    public static C2DMResponse logicalResponseFor(HttpResponse response) {
+    public static C2DMResponse logicalResponseFor(HttpResponse response, List<NameValuePair> pairs) {
         int statusCode = response.getStatusLine().getStatusCode();
         switch (statusCode) {
         case 503: return C2DMResponse.SERVER_UNAVAILABLE;
         case 401: return C2DMResponse.INVALID_AUTHENTICATION;
         case 200: {
-            try {
-                List<NameValuePair> pairs = parseResponse(response.getEntity());
-                assert pairs.size() == 1;
+            assert pairs.size() == 1;
 
-                NameValuePair entry = pairs.get(0);
-                if ("id".equals(entry.getName())) {
-                    return C2DMResponse.SUCCESSFUL;
-                }
-
-                assert "Error".equals(entry.getName());
-                String value = entry.getValue();
-
-                for (C2DMResponse r: logicalResponses) {
-                    if (value.equals(r.getKey())) {
-                        return r;
-                    }
-                }
-
-                return C2DMResponse.UNKNOWN_ERROR;
-            } catch (IOException e) {
-                return C2DMResponse.UNKNOWN_ERROR;
+            NameValuePair entry = pairs.get(0);
+            if ("id".equals(entry.getName())) {
+                return C2DMResponse.SUCCESSFUL;
             }
+
+            assert "Error".equals(entry.getName());
+            String value = entry.getValue();
+
+            for (C2DMResponse r: logicalResponses) {
+                if (value.equals(r.getKey())) {
+                    return r;
+                }
+            }
+
+            return C2DMResponse.UNKNOWN_ERROR;
         }
         default: return C2DMResponse.UNKNOWN_ERROR;
         }
@@ -147,7 +153,7 @@ public final class Utilities {
      * "text/plain" rather than "application/x-www-form-urlencoded"
      * as expected by Apache HTTP.
      */
-    private static List<NameValuePair> parseResponse(HttpEntity entity)
+    public static List<NameValuePair> parseResponse(HttpEntity entity)
     throws ParseException, IOException {
         String charset = "UTF-8";
         List<NameValuePair> result = new ArrayList<NameValuePair>();
