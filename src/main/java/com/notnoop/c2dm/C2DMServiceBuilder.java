@@ -181,12 +181,12 @@ public class C2DMServiceBuilder {
      * @param   timeout     the time out period in millis
      * @return this
      */
-    public C2DMServiceBuilder timeout(int timeout) {
+    public C2DMServiceBuilder withTimeout(int timeout) {
         this.timeout = timeout;
         return this;
     }
 
-    public C2DMServiceBuilder delegate(C2DMDelegate delegate) {
+    public C2DMServiceBuilder withDelegate(C2DMDelegate delegate) {
         this.delegate = delegate;
         return this;
     }
