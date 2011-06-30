@@ -31,11 +31,15 @@
 package com.notnoop.c2dm.internal;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 
 import com.notnoop.c2dm.C2DMDelegate;
 import com.notnoop.c2dm.C2DMNotification;
@@ -45,6 +49,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 public final class Utilities {
     private Utilities() { throw new AssertionError("Uninstantiable class"); }
@@ -111,7 +116,7 @@ public final class Utilities {
         case 401: return C2DMResponse.INVALID_AUTHENTICATION;
         case 200: {
             try {
-                List<NameValuePair> pairs = URLEncodedUtils.parse(response.getEntity());
+                List<NameValuePair> pairs = parseResponse(response.getEntity());
                 assert pairs.size() == 1;
 
                 NameValuePair entry = pairs.get(0);
@@ -135,5 +140,22 @@ public final class Utilities {
         }
         default: return C2DMResponse.UNKNOWN_ERROR;
         }
+    }
+
+    /**
+     * Workaround Google responding with Content-Type being
+     * "text/plain" rather than "application/x-www-form-urlencoded"
+     * as expected by Apache HTTP.
+     */
+    private static List<NameValuePair> parseResponse(HttpEntity entity)
+    throws ParseException, IOException {
+        String charset = "UTF-8";
+        List<NameValuePair> result = new ArrayList<NameValuePair>();
+        final String content = EntityUtils.toString(entity, HTTP.ASCII);
+        if (content != null && content.length() > 0) {
+            result = new ArrayList <NameValuePair>();
+            URLEncodedUtils.parse(result, new Scanner(content), charset);
+        }
+        return result;
     }
 }
