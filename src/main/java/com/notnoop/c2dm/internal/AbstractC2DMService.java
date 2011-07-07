@@ -31,6 +31,7 @@
 package com.notnoop.c2dm.internal;
 
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -41,11 +42,11 @@ import com.notnoop.c2dm.exceptions.NetworkIOException;
 
 public abstract class AbstractC2DMService implements C2DMService {
     private final String serviceUri;
-    private final String authToken;
+    private final AtomicReference<String> authToken;
 
     protected AbstractC2DMService(String serviceUri, String authToken) {
         this.serviceUri = serviceUri;
-        this.authToken = authToken;
+        this.authToken = new AtomicReference<String>(authToken);
     }
 
     protected HttpPost postMessage(String registrationId, C2DMNotification notification) {
@@ -58,7 +59,7 @@ public abstract class AbstractC2DMService implements C2DMService {
             throw new AssertionError("No UTF-8! It's Doom Day!");
         }
 
-        method.addHeader("Authorization", "GoogleLogin auth=" + authToken);
+        method.addHeader("Authorization", "GoogleLogin auth=" + authToken.get());
 
         return method;
     }
@@ -78,4 +79,8 @@ public abstract class AbstractC2DMService implements C2DMService {
     public void start() {}
 
     public void stop() {}
+
+    protected void updateAuthToken(String newAuthToken) {
+        this.authToken.set(newAuthToken);
+    }
 }

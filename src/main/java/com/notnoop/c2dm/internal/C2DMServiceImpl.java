@@ -57,7 +57,7 @@ public class C2DMServiceImpl extends AbstractC2DMService implements C2DMService 
     protected void push(HttpPost request, C2DMNotification message) {
         try {
             HttpResponse response = httpClient.execute(request);
-            Utilities.fireDelegate(message, response, delegate);
+            Utilities.fireDelegate(message, response, delegate, this);
             EntityUtils.consume(response.getEntity());
         } catch (ClientProtocolException e) {
             throw new RuntimeException(e);

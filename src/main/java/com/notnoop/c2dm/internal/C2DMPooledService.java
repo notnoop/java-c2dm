@@ -59,7 +59,7 @@ public class C2DMPooledService extends AbstractC2DMService implements C2DMServic
             public void run() {
                 try {
                     HttpResponse response = httpClient.execute(request);
-                    Utilities.fireDelegate(message, response, delegate);
+                    Utilities.fireDelegate(message, response, delegate, C2DMPooledService.this);
                     EntityUtils.consume(response.getEntity());
                 } catch (Exception e) {
                     throw new RuntimeException(e);

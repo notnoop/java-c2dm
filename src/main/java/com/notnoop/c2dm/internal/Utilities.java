@@ -88,7 +88,7 @@ public final class Utilities {
     private static final String UPDATE_CLIENT_AUTH = "Update-Client-Auth";
 
     public static void fireDelegate(C2DMNotification message,
-            HttpResponse response, C2DMDelegate delegate) {
+            HttpResponse response, C2DMDelegate delegate, AbstractC2DMService service) {
         if (delegate == null) {
             return;
         }
@@ -115,6 +115,7 @@ public final class Utilities {
             Header header = response.getFirstHeader(UPDATE_CLIENT_AUTH);
 
             String newAuthToken = header.getValue();
+            service.updateAuthToken(newAuthToken);
             delegate.authTokenUpdated(newAuthToken);
         }
     }
