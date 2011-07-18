@@ -41,6 +41,8 @@ To send a notification, you can do it in two steps:
           .build();
         String registrationId = "deviceRegistrationID";
         service.push(registrationId, notification);
+(Read http://stackoverflow.com/questions/4164921/who-provides-auth-token-to-use-with-c2dm in order to get the serviceAuthenticationToken)
+
 
 That's it!
 
