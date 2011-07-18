@@ -33,7 +33,7 @@ To send a notification, you can do it in two steps:
             .build();
 
 2. Create and send the message
-
+    
     C2DMNotification notification = C2DM.newNotification()
     .collapseKey("daily_message")
     .data("payload", "Here be dragons (or your payload)")
@@ -41,7 +41,7 @@ To send a notification, you can do it in two steps:
     .build();
     String registrationId = "deviceRegistrationID";
     service.push(registrationId, notification);
-
+    
 That's it!
 
 Features In the Making
