@@ -29,7 +29,7 @@ To send a notification, you can do it in two steps:
 
         C2DMService service =
             C2DM.newService()
-            .withAuthToken(("serviceAuthenticationToken")
+            .withAuthToken("serviceAuthenticationToken")
             .build();
 
 2. Create and send the message
