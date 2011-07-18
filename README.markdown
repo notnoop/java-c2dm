@@ -42,6 +42,12 @@ To send a notification, you can do it in two steps:
     String registrationId = "deviceRegistrationID";
     service.push(registrationId, notification);
     
+
+        C2DMService service =
+            C2DM.newService()
+            .withAuthToken("serviceAuthenticationToken")
+            .build();
+
 That's it!
 
 Features In the Making
