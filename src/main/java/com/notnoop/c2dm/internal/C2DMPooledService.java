@@ -31,6 +31,7 @@
 package com.notnoop.c2dm.internal;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -71,8 +72,15 @@ public class C2DMPooledService extends AbstractC2DMService implements C2DMServic
     @Override
     public void stop() {
         super.stop();
-        this.httpClient.getConnectionManager().shutdown();
         this.executor.shutdown();
+        try {
+            if(!this.executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                this.executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+        }
+
+        this.httpClient.getConnectionManager().shutdown();
     }
 
 }
