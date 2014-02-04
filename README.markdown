@@ -35,12 +35,28 @@ To send a notification, you can do it in two steps:
 2. Create and send the message
 
         C2DMNotification notification = C2DM.newNotification()
-            .collapseKey("daily_message").delayWhileIdle(true)
-            .build();
+          .collapseKey("daily_message")
+          .data("payload", "Here be dragons (or another message)")
+          .delayWhileIdle(true)
+          .build();
         String registrationId = "deviceRegistrationID";
         service.push(registrationId, notification);
+(Read http://stackoverflow.com/questions/4164921/who-provides-auth-token-to-use-with-c2dm in order to get the serviceAuthenticationToken)
+
 
 That's it!
+
+On the device, you will be able to recieve the message by doing this:
+
+        @Override
+        protected void onMessage(Context context, Intent intent) {
+        	//Extract the payload from the message
+        	Bundle extras = intent.getExtras();
+        	if (extras != null) {
+        		System.out.println(extras.get("payload")); //Will print to the logcat
+        		// Do something with the data you recieved
+        	}
+        }
 
 Features In the Making
 ---------------------------
