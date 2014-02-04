@@ -33,12 +33,20 @@ To send a notification, you can do it in two steps:
             .build();
 
 2. Create and send the message
-
+    
         C2DMNotification notification = C2DM.newNotification()
-            .collapseKey("daily_message").delayWhileIdle(true)
-            .build();
+        .collapseKey("daily_message")
+        .data("payload", "Here be dragons (or your payload)")
+        .delayWhileIdle(true)
+        .build();
         String registrationId = "deviceRegistrationID";
         service.push(registrationId, notification);
+    
+
+        C2DMService service =
+            C2DM.newService()
+            .withAuthToken("serviceAuthenticationToken")
+            .build();
 
 That's it!
 
